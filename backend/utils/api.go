@@ -18,6 +18,7 @@ func GetRouters() []RouterItem {
 		{"/ruleMatch": HandleRuleMatchApi},
 		{"/proxyDial": HandleProxyDialApi},
 		{"/traffic": HandleTrafficApi},
+		{"/processDetail": HandleProcessDetailApi},
 	}
 	return apiList
 }
@@ -43,6 +44,14 @@ func HandleProxyDialApi(w http.ResponseWriter, r *http.Request, db *sql.DB, f em
 func HandleTrafficApi(w http.ResponseWriter, r *http.Request, db *sql.DB, f embed.FS) {
 	traffic := QueryTrafficRequests(db)
 	b, _ := json.Marshal(traffic)
+	w.Write(b)
+}
+
+func HandleProcessDetailApi(w http.ResponseWriter, r *http.Request, db *sql.DB, f embed.FS) {
+	query := r.URL.Query()
+	path := query.Get("path")
+	processDetail := QueryProcessDetail(db, path)
+	b, _ := json.Marshal(processDetail)
 	w.Write(b)
 }
 

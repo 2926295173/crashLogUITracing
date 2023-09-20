@@ -3,20 +3,13 @@ import { computed } from 'vue'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
 import { useClashTracingStore } from '@/stores'
+import { formatTime } from '@/utils'
 import BaseCard from './BaseCard.vue'
 import BaseChart from './BaseChart.vue'
 
 const store = useClashTracingStore()
 
 const traffic = computed(() => store.traffic)
-
-const formatTime = (smillisecond: number) => {
-  const d = new Date(smillisecond * 1000)
-  const h = d.getHours().toString().padStart(2, '0')
-  const m = d.getMinutes().toString().padStart(2, '0')
-  const s = d.getSeconds().toString().padStart(2, '0')
-  return `${h}:${m}:${s}`
-}
 
 const formatTraffic = (byte: number) => {
   return (byte / 8 / 1024).toFixed(2)

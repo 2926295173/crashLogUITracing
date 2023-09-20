@@ -16,8 +16,8 @@ import (
 
 var (
 	mutex            sync.Mutex
-	bufferSize       = 256
-	interval         = 256
+	bufferSize       = 64
+	interval         = 64
 	latestTraffic    tracingstruct.Traffic
 	dnsRequestBuffer = []tracingstruct.DNSRequest{}
 	ruleMatchBuffer  = []tracingstruct.RuleMatch{}
@@ -223,13 +223,9 @@ func QueryDnsRequests(db *sql.DB) tracingstruct.ApiDnsRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		name, duration, count := "", 0.0, 0
-		rows.Scan(&name, &duration, &count)
-		dnsRequest.Counting = append(dnsRequest.Counting, tracingstruct.DNSCounting{
-			Name:     name,
-			Duration: duration,
-			Count:    count,
-		})
+		r := tracingstruct.DNSCounting{}
+		rows.Scan(&r.Name, &r.Duration, &r.Count)
+		dnsRequest.Counting = append(dnsRequest.Counting, r)
 	}
 
 	// DNS queryType 统计
@@ -237,13 +233,9 @@ func QueryDnsRequests(db *sql.DB) tracingstruct.ApiDnsRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		qType, duration, count := "", 0.0, 0
-		rows.Scan(&qType, &duration, &count)
-		dnsRequest.QTypeCounting = append(dnsRequest.QTypeCounting, tracingstruct.DNSQTypeCounting{
-			QType:    qType,
-			Duration: duration,
-			Count:    count,
-		})
+		r := tracingstruct.DNSQTypeCounting{}
+		rows.Scan(&r.QType, &r.Duration, &r.Count)
+		dnsRequest.QTypeCounting = append(dnsRequest.QTypeCounting, r)
 	}
 
 	// DNS dnsType统计
@@ -251,13 +243,9 @@ func QueryDnsRequests(db *sql.DB) tracingstruct.ApiDnsRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		dnsType, duration, count := "", 0.0, 0
-		rows.Scan(&dnsType, &duration, &count)
-		dnsRequest.DNSTypeCounting = append(dnsRequest.DNSTypeCounting, tracingstruct.DNSTypeCounting{
-			DNSType:  dnsType,
-			Duration: duration,
-			Count:    count,
-		})
+		r := tracingstruct.DNSTypeCounting{}
+		rows.Scan(&r.DNSType, &r.Duration, &r.Count)
+		dnsRequest.DNSTypeCounting = append(dnsRequest.DNSTypeCounting, r)
 	}
 
 	mutex.Unlock()
@@ -280,14 +268,9 @@ func QueryRuleMatchRequests(db *sql.DB) tracingstruct.ApiRuleMatchRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		duration, payload, proxy, count := 0.0, "", "", 0
-		rows.Scan(&duration, &payload, &proxy, &count)
-		ruleMatch.Counting = append(ruleMatch.Counting, tracingstruct.RuleMatchCounting{
-			Duration: duration,
-			Payload:  payload,
-			Proxy:    proxy,
-			Count:    count,
-		})
+		r := tracingstruct.RuleMatchCounting{}
+		rows.Scan(&r.Duration, &r.Payload, &r.Proxy, &r.Count)
+		ruleMatch.Counting = append(ruleMatch.Counting, r)
 	}
 
 	// 查询端口来匹配流量的类型
@@ -295,12 +278,9 @@ func QueryRuleMatchRequests(db *sql.DB) tracingstruct.ApiRuleMatchRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		port, count := 0, 0
-		rows.Scan(&port, &count)
-		ruleMatch.PortCounting = append(ruleMatch.PortCounting, tracingstruct.RuleMatchPortCounting{
-			Port:  port,
-			Count: count,
-		})
+		r := tracingstruct.RuleMatchPortCounting{}
+		rows.Scan(&r.Port, &r.Count)
+		ruleMatch.PortCounting = append(ruleMatch.PortCounting, r)
 	}
 
 	// 查询路径来统计各个APP的连接数
@@ -308,12 +288,9 @@ func QueryRuleMatchRequests(db *sql.DB) tracingstruct.ApiRuleMatchRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		path, count := "", 0
-		rows.Scan(&path, &count)
-		ruleMatch.ProcessCounting = append(ruleMatch.ProcessCounting, tracingstruct.RuleMatchProcessCounting{
-			Path:  path,
-			Count: count,
-		})
+		r := tracingstruct.RuleMatchProcessCounting{}
+		rows.Scan(&r.Path, &r.Count)
+		ruleMatch.ProcessCounting = append(ruleMatch.ProcessCounting, r)
 	}
 
 	// 统计各个客户端IP的请求次数
@@ -321,12 +298,9 @@ func QueryRuleMatchRequests(db *sql.DB) tracingstruct.ApiRuleMatchRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		ip, count := "", 0
-		rows.Scan(&ip, &count)
-		ruleMatch.ClientCounting = append(ruleMatch.ClientCounting, tracingstruct.RuleMatchClientCounting{
-			IP:    ip,
-			Count: count,
-		})
+		r := tracingstruct.RuleMatchClientCounting{}
+		rows.Scan(&r.IP, &r.Count)
+		ruleMatch.ClientCounting = append(ruleMatch.ClientCounting, r)
 	}
 
 	mutex.Unlock()
@@ -347,13 +321,9 @@ func QueryProxyDialRequests(db *sql.DB) tracingstruct.ApiProxyDialRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		proxy, duration, count := "", 0.0, 0
-		rows.Scan(&proxy, &duration, &count)
-		proxyDial.ProxyCounting = append(proxyDial.ProxyCounting, tracingstruct.ProxyDialProxyCounting{
-			Proxy:    proxy,
-			Duration: duration,
-			Count:    count,
-		})
+		r := tracingstruct.ProxyDialProxyCounting{}
+		rows.Scan(&r.Proxy, &r.Duration, &r.Count)
+		proxyDial.ProxyCounting = append(proxyDial.ProxyCounting, r)
 	}
 
 	// 查询域名被访问次数和时间
@@ -361,13 +331,9 @@ func QueryProxyDialRequests(db *sql.DB) tracingstruct.ApiProxyDialRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		host, duration, count := "", 0.0, 0
-		rows.Scan(&host, &duration, &count)
-		proxyDial.HostCounting = append(proxyDial.HostCounting, tracingstruct.ProxyDialHostCounting{
-			Host:     host,
-			Duration: duration,
-			Count:    count,
-		})
+		r := tracingstruct.ProxyDialHostCounting{}
+		rows.Scan(&r.Host, &r.Duration, &r.Count)
+		proxyDial.HostCounting = append(proxyDial.HostCounting, r)
 	}
 
 	mutex.Unlock()
@@ -389,10 +355,7 @@ func QueryTrafficRequests(db *sql.DB) tracingstruct.ApiTrafficRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		up, down := 0.0, 0.0
-		rows.Scan(&up, &down)
-		traffic.Up = up
-		traffic.Down = down
+		rows.Scan(&traffic.Up, &traffic.Down)
 	}
 
 	// 查询流量历史
@@ -400,18 +363,34 @@ func QueryTrafficRequests(db *sql.DB) tracingstruct.ApiTrafficRequest {
 	defer rows.Close()
 
 	for rows.Next() {
-		up, down, createTime := 0.0, 0.0, 0
-		rows.Scan(&up, &down, &createTime)
-		traffic.History = append(traffic.History, tracingstruct.ApiTrafficHistory{
-			Up:         up,
-			Down:       down,
-			CreateTime: createTime,
-		})
+		r := tracingstruct.ApiTrafficHistory{}
+		rows.Scan(&r.Up, &r.Down, &r.CreateTime)
+		traffic.History = append(traffic.History, r)
 	}
 
 	mutex.Unlock()
 
 	return traffic
+}
+
+func QueryProcessDetail(db *sql.DB, path string) []tracingstruct.ApiProcessDetail {
+	mutex.Lock()
+
+	details := []tracingstruct.ApiProcessDetail{}
+
+	// 根据进程查询请求
+	rows, _ := db.Query(`SELECT m_sourceIP, m_sourcePort, m_destinationIP, m_destinationPort, m_host, m_dnsMode, createTime FROM "rule_match" WHERE m_processPath = ?`, path)
+	defer rows.Close()
+
+	for rows.Next() {
+		r := tracingstruct.ApiProcessDetail{}
+		rows.Scan(&r.SourceIP, &r.SourcePort, &r.DestinationIP, &r.DestinationPort, &r.Host, &r.DnsMode, &r.CreateTime)
+		details = append(details, r)
+	}
+
+	mutex.Unlock()
+
+	return details
 }
 
 func syncDNSRequest(db *sql.DB) {

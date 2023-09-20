@@ -59,3 +59,13 @@ export type TrafficType = {
     createTime: number
   }[]
 }
+
+export type ProcessDetailType = {
+  sourceIP: string
+  sourcePort: number
+  destinationIP: string
+  destinationPort: number
+  host: string
+  dnsMode: string
+  createTime: number
+}[]

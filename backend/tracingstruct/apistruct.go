@@ -81,3 +81,13 @@ type ApiTrafficRequest struct {
 	Down    float64             `json:"down"`
 	History []ApiTrafficHistory `json:"history"`
 }
+
+type ApiProcessDetail struct {
+	SourceIP        string `json:"sourceIP"`
+	SourcePort      int    `json:"sourcePort"`
+	DestinationIP   string `json:"destinationIP"`
+	DestinationPort int    `json:"destinationPort"`
+	Host            string `json:"host"`
+	DnsMode         string `json:"dnsMode"`
+	CreateTime      int    `json:"createTime"`
+}

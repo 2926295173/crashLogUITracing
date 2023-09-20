@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useClashTracingStore } from '@/stores'
-import IconButton from './IconButton.vue'
+import IconButton from './baseComponents/IconButton.vue'
 
 const title = import.meta.env.VITE_APP_TITLE
 const autoRefreshTimer = ref(-1)
@@ -43,6 +43,12 @@ async function handleSyncDB() {
       >
       </IconButton>
       <IconButton @click="handleSyncDB" title="同步内存的数据到数据库" icon="sync" />
+      <IconButton
+        icon="github"
+        type="link"
+        href="https://github.com/openrhc/Clash-Tracing"
+        style="margin-left: 4px"
+      />
       <!-- <IconButton text="Last 1 hour" icon="dropdown" style="margin-left: 4px">
         <div class="select-time">
           <div value="1">1</div>
