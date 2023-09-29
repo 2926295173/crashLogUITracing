@@ -1,3 +1,4 @@
 backend/static/*
 clash-tracing.db
 clash-tracing.db-journal
+clash-tracing.exe
