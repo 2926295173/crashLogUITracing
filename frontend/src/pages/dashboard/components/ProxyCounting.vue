@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import type { EChartsOption } from 'echarts'
 import { useClashTracingStore } from '@/stores'
-import BaseCard from './BaseCard.vue'
-import BaseChart from './BaseChart.vue'
+import Card from '@/components/Card/index.vue'
+import Chart from '@/components/Chart/index.vue'
 
 const store = useClashTracingStore()
 
@@ -72,9 +72,9 @@ const options = computed(() => {
 </script>
 
 <template>
-  <BaseCard title="代理使用次数">
-    <BaseChart height="240px" :options="options" />
-  </BaseCard>
+  <Card title="代理使用次数">
+    <Chart height="240px" :options="options" />
+  </Card>
 </template>
 
 <style lang="less" scoped></style>

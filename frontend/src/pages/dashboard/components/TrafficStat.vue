@@ -3,17 +3,13 @@ import { computed } from 'vue'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
 import { useClashTracingStore } from '@/stores'
-import { formatTime } from '@/utils'
-import BaseCard from './BaseCard.vue'
-import BaseChart from './BaseChart.vue'
+import { formatTime, formatTraffic } from '@/utils'
+import Card from '@/components/Card/index.vue'
+import Chart from '@/components/Chart/index.vue'
 
 const store = useClashTracingStore()
 
 const traffic = computed(() => store.traffic)
-
-const formatTraffic = (byte: number) => {
-  return (byte / 8 / 1024).toFixed(2)
-}
 
 const options = computed(() => {
   const opt: EChartsOption = {
@@ -21,11 +17,20 @@ const options = computed(() => {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'cross',
-        label: {
-          backgroundColor: '#6a7985'
-        }
+      formatter: (params: any) => {
+        const time = params[0].name
+        const up = params[0].seriesName + '：' + formatTraffic(params[0].value)
+        const down = params[1].seriesName + '：' + formatTraffic(params[1].value)
+        const upColor = params[0].color
+        const downColor = params[1].color
+        const dom = /*html */ `
+          <div>
+            <div>${time}</div>
+            <div><span style="width: 10px; height: 10px; margin-right: 4px; border-radius: 10px;display: inline-block; background-color: ${upColor}"></span>${up}</div>
+            <div><span style="width: 10px; height: 10px; margin-right: 4px; border-radius: 10px;display: inline-block; background-color: ${downColor}"></span>${down}</div>
+          </div>
+        `
+        return dom
       }
     },
     legend: {
@@ -46,7 +51,12 @@ const options = computed(() => {
     ],
     yAxis: [
       {
-        type: 'value'
+        type: 'value',
+        axisLabel: {
+          formatter(value) {
+            return formatTraffic(value)
+          }
+        }
       }
     ],
     series: [
@@ -75,7 +85,7 @@ const options = computed(() => {
         emphasis: {
           focus: 'series'
         },
-        data: traffic.value.history.map((v) => formatTraffic(v.up)).reverse()
+        data: traffic.value.history.map((v) => v.up).reverse()
       },
       {
         name: 'Down',
@@ -102,7 +112,7 @@ const options = computed(() => {
         emphasis: {
           focus: 'series'
         },
-        data: traffic.value.history.map((v) => formatTraffic(v.down)).reverse()
+        data: traffic.value.history.map((v) => v.down).reverse()
       }
     ]
   }
@@ -111,9 +121,9 @@ const options = computed(() => {
 </script>
 
 <template>
-  <BaseCard title="实时流量">
-    <BaseChart :options="options" />
-  </BaseCard>
+  <Card title="实时流量">
+    <Chart :options="options" />
+  </Card>
 </template>
 
 <style lang="less" scoped></style>

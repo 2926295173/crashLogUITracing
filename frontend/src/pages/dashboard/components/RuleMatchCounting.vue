@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useClashTracingStore } from '@/stores'
-import BaseCard from './BaseCard.vue'
+import Card from '@/components/Card/index.vue'
 
 const store = useClashTracingStore()
 
@@ -17,7 +17,7 @@ const formatNumber = (n: number) => n.toFixed(2)
 </script>
 
 <template>
-  <BaseCard title="规则匹配（次数/速度）">
+  <Card title="规则匹配（次数/速度）">
     <div class="proxies">
       <div v-for="proxy in proxies" :key="proxy.proxy" class="proxies-item hover-item">
         <div class="proxy">{{ proxy.proxy }}({{ proxy.payload || '*' }})</div>
@@ -38,7 +38,7 @@ const formatNumber = (n: number) => n.toFixed(2)
         </div>
       </div>
     </div>
-  </BaseCard>
+  </Card>
 </template>
 
 <style lang="less" scoped>

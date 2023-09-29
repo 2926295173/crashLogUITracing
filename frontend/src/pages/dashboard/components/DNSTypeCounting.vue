@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import type { EChartsOption } from 'echarts'
 import { useClashTracingStore } from '@/stores'
-import BaseCard from './BaseCard.vue'
-import BaseChart from './BaseChart.vue'
+import Card from '@/components/Card/index.vue'
+import Chart from '@/components/Chart/index.vue'
 
 const store = useClashTracingStore()
 
@@ -78,12 +78,12 @@ const dnsQTypeOption = computed(() => {
 </script>
 
 <template>
-  <BaseCard title="DNS查询类型" min-height="170px">
+  <Card title="DNS查询类型" min-height="170px">
     <div style="display: flex">
-      <BaseChart height="160px" :options="dnsTypeOption" />
-      <BaseChart height="160px" :options="dnsQTypeOption" />
+      <Chart height="160px" :options="dnsTypeOption" />
+      <Chart height="160px" :options="dnsQTypeOption" />
     </div>
-  </BaseCard>
+  </Card>
 </template>
 
 <style lang="less" scoped></style>

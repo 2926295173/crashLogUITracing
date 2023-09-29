@@ -1,33 +1,33 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useClashTracingStore } from '@/stores'
-import BaseCard from './BaseCard.vue'
+import Card from '@/components/Card/index.vue'
 
 const store = useClashTracingStore()
 
-const dns = computed(() => store.dnsRequest.counting)
+const domains = computed(() => store.proxyDial.hostCounting)
 
-const maxValue = computed(() => Math.max(...dns.value.map((v) => v.count)))
+const maxValue = computed(() => Math.max(...domains.value.map((v) => v.count)))
 
 const calcWidth = (count: number) => (count / maxValue.value) * 100 + '%'
 </script>
 
 <template>
-  <BaseCard title="DNS查询次数">
-    <div class="dns">
-      <div v-for="d in dns" :key="d.name" class="dns-item hover-item">
-        <div class="domain">{{ d.name }}</div>
+  <Card title="域名访问次数">
+    <div class="domains">
+      <div v-for="domain in domains" :key="domain.host" class="domains-item hover-item">
+        <div class="domain">{{ domain.host }}</div>
         <div class="processbar">
-          <div :style="{ width: calcWidth(d.count) }" class="process"></div>
+          <div :style="{ width: calcWidth(domain.count) }" class="process"></div>
         </div>
-        <div class="count">{{ d.count }}</div>
+        <div class="count">{{ domain.count }}</div>
       </div>
     </div>
-  </BaseCard>
+  </Card>
 </template>
 
 <style lang="less" scoped>
-.dns {
+.domains {
   &-item {
     display: flex;
     align-items: center;

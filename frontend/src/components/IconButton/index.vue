@@ -43,37 +43,5 @@ const onMouseLeave = () => {
 </template>
 
 <style lang="less" scoped>
-.btn {
-  padding: 0 6px;
-  min-width: 28px;
-  min-height: 28px;
-  text-align: center;
-  font-size: 14px;
-  color: #8d8e9a;
-  background: #101217;
-  border: 1px solid #22252a;
-  border-radius: 1px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s;
-
-  &:hover {
-    opacity: 0.6;
-  }
-
-  .text {
-    padding: 0 4px 0 8px;
-    font-size: 12px;
-  }
-}
-.slot {
-  position: absolute;
-  background: #101217;
-  left: 0;
-  right: 0;
-  margin: 0 6px;
-}
+@import url(style.less);
 </style>

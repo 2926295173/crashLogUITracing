@@ -69,3 +69,10 @@ export type ProcessDetailType = {
   dnsMode: string
   createTime: number
 }[]
+
+export type PageType<T> = {
+  total: number
+  page: number
+  pageSize: number
+  data: T[]
+}

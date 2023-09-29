@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useClashTracingStore } from '@/stores'
-import IconButton from './baseComponents/IconButton.vue'
+import { ref } from 'vue';
+import { useClashTracingStore } from '@/stores';
+import IconButton from '@/components/IconButton/index.vue';
 
 const title = import.meta.env.VITE_APP_TITLE
 const autoRefreshTimer = ref(-1)
@@ -61,32 +61,5 @@ async function handleSyncDB() {
 </template>
 
 <style lang="less" scoped>
-.actionbar {
-  display: flex;
-  align-items: center;
-  height: 46px;
-  padding: 0 16px;
-  background: #181b1e;
-  .logo {
-    color: #fff;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  .action {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-
-    .select-time {
-      color: #fff;
-      div {
-        padding: 0 8px;
-        line-height: 36px;
-        &:hover {
-          background: #181b1e;
-        }
-      }
-    }
-  }
-}
+@import url(style.less);
 </style>

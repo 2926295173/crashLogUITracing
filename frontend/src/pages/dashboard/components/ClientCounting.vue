@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useClashTracingStore } from '@/stores'
-import BaseCard from './BaseCard.vue'
+import Card from '@/components/Card/index.vue'
 
 const store = useClashTracingStore()
 
@@ -13,7 +13,7 @@ const calcWidth = (count: number) => (count / maxValue.value) * 100 + '%'
 </script>
 
 <template>
-  <BaseCard title="局域网访问" min-height="130px">
+  <Card title="局域网访问" min-height="170px">
     <div class="clients">
       <div v-for="client in clients" :key="client.ip" class="clients-item hover-item">
         <div class="ip">{{ client.ip }}</div>
@@ -23,7 +23,7 @@ const calcWidth = (count: number) => (count / maxValue.value) * 100 + '%'
         <div class="count">{{ client.count }}</div>
       </div>
     </div>
-  </BaseCard>
+  </Card>
 </template>
 
 <style lang="less" scoped>

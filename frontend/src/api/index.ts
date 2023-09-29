@@ -4,7 +4,8 @@ import type {
   RuleMatchType,
   ProxyDialType,
   TrafficType,
-  ProcessDetailType
+  ProcessDetailType,
+  PageType
 } from './types'
 
 enum Api {
@@ -26,5 +27,5 @@ export const getTraffic = () => httpGet<TrafficType>(Api.Traffic)
 
 export const syncDB = () => httpGet<null>(Api.Sync)
 
-export const getProcessDetail = (path: string) =>
-  httpGet<ProcessDetailType>(Api.ProcessDetail, { path })
+export const getProcessDetail = (params: Record<string, any>) =>
+  httpGet<PageType<ProcessDetailType>>(Api.ProcessDetail, params)
