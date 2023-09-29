@@ -351,15 +351,10 @@ func QueryTrafficRequests(db *sql.DB) tracingstruct.ApiTrafficRequest {
 	}
 
 	// 查询平均速度
-	rows, _ := db.Query(`SELECT AVG(up) as up, AVG(down) as down FROM "traffic"`)
-	defer rows.Close()
-
-	for rows.Next() {
-		rows.Scan(&traffic.Up, &traffic.Down)
-	}
+	db.QueryRow(`SELECT AVG(up) as up, AVG(down) as down FROM "traffic"`).Scan(&traffic.Up, &traffic.Down)
 
 	// 查询流量历史
-	rows, _ = db.Query(`SELECT up, down, createTime FROM "traffic" ORDER BY createTime DESC LIMIT 10`)
+	rows, _ := db.Query(`SELECT up, down, createTime FROM "traffic" ORDER BY createTime DESC LIMIT 10`)
 	defer rows.Close()
 
 	for rows.Next() {
@@ -373,24 +368,32 @@ func QueryTrafficRequests(db *sql.DB) tracingstruct.ApiTrafficRequest {
 	return traffic
 }
 
-func QueryProcessDetail(db *sql.DB, path string) []tracingstruct.ApiProcessDetail {
+func QueryProcessDetail(db *sql.DB, path string, page int, pageSize int) tracingstruct.PageType[[]tracingstruct.ApiProcessDetail] {
 	mutex.Lock()
 
-	details := []tracingstruct.ApiProcessDetail{}
+	res := tracingstruct.PageType[[]tracingstruct.ApiProcessDetail]{
+		Total:    0,
+		Page:     page,
+		PageSize: pageSize,
+		Data:     []tracingstruct.ApiProcessDetail{},
+	}
 
 	// 根据进程查询请求
-	rows, _ := db.Query(`SELECT m_sourceIP, m_sourcePort, m_destinationIP, m_destinationPort, m_host, m_dnsMode, createTime FROM "rule_match" WHERE m_processPath = ?`, path)
+	rows, _ := db.Query(`SELECT m_sourceIP, m_sourcePort, m_destinationIP, m_destinationPort, m_host, m_dnsMode, createTime FROM "rule_match" WHERE m_processPath = ? LIMIT ?,?`, path, (page-1)*pageSize, pageSize)
 	defer rows.Close()
 
 	for rows.Next() {
 		r := tracingstruct.ApiProcessDetail{}
 		rows.Scan(&r.SourceIP, &r.SourcePort, &r.DestinationIP, &r.DestinationPort, &r.Host, &r.DnsMode, &r.CreateTime)
-		details = append(details, r)
+		res.Data = append(res.Data, r)
 	}
+
+	// 查总数
+	db.QueryRow(`SELECT COUNT(1) FROM "rule_match" where m_processPath = ?`, path).Scan(&res.Total)
 
 	mutex.Unlock()
 
-	return details
+	return res
 }
 
 func syncDNSRequest(db *sql.DB) {

@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -50,7 +51,9 @@ func HandleTrafficApi(w http.ResponseWriter, r *http.Request, db *sql.DB, f embe
 func HandleProcessDetailApi(w http.ResponseWriter, r *http.Request, db *sql.DB, f embed.FS) {
 	query := r.URL.Query()
 	path := query.Get("path")
-	processDetail := QueryProcessDetail(db, path)
+	page, _ := strconv.Atoi(query.Get("page"))
+	pageSize, _ := strconv.Atoi(query.Get("pageSize"))
+	processDetail := QueryProcessDetail(db, path, page, pageSize)
 	b, _ := json.Marshal(processDetail)
 	w.Write(b)
 }

@@ -91,3 +91,10 @@ type ApiProcessDetail struct {
 	DnsMode         string `json:"dnsMode"`
 	CreateTime      int    `json:"createTime"`
 }
+
+type PageType[T any] struct {
+	Total    int `json:"total"`
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+	Data     T   `json:"data"`
+}

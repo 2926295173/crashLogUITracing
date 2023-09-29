@@ -3,7 +3,7 @@
     pnpm build
 )
 
-cp -r frontent/dist/* backend/static/
+cp -r frontend/dist/* backend/static/
 
 (
     cd backend
