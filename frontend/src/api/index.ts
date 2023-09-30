@@ -14,7 +14,8 @@ enum Api {
   ProxyDial = '/proxyDial',
   Traffic = '/traffic',
   Sync = '/sync',
-  ProcessDetail = '/processDetail'
+  ProcessDetail = '/processDetail',
+  DomainDetail = '/domainDetail'
 }
 
 export const getDnsRequest = () => httpGet<DnsRequestType>(Api.DnsRequest)
@@ -29,3 +30,6 @@ export const syncDB = () => httpGet<null>(Api.Sync)
 
 export const getProcessDetail = (params: Record<string, any>) =>
   httpGet<PageType<ProcessDetailType>>(Api.ProcessDetail, params)
+
+export const getDomainDetail = (params: Record<string, any>) =>
+  httpGet<PageType<ProcessDetailType>>(Api.DomainDetail, params)

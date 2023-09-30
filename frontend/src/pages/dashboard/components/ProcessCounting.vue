@@ -36,7 +36,7 @@ const columns: TableColumnItem[] = [
   {
     title: '时间',
     dataIndex: 'createTime',
-    render: (val: number) => formatTime(val)
+    render: ({ val }) => formatTime(val)
   }
 ]
 
@@ -67,8 +67,13 @@ const handleDetail = async (path: string) => {
     </div>
   </Card>
   <Modal :open="isModalOpen" @on-cancel="setIsModalOpen(false)">
-    <Card title="进程详情" min-height="350px">
-      <Table :columns="columns" :params="{ path: processPath }" :api="getProcessDetail" />
+    <Card title="进程详情" min-height="450px">
+      <Table
+        :columns="columns"
+        :params="{ path: processPath }"
+        :title="processPath"
+        :api="getProcessDetail"
+      />
     </Card>
   </Modal>
 </template>
