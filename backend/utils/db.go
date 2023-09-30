@@ -34,24 +34,26 @@ func InitDBTables(db *sql.DB) {
 		"createTime" integer
 	);
 	CREATE TABLE IF NOT EXISTS "proxy_dial" (
-		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"id" text NOT NULL,
 		"address" TEXT,
 		"duration" integer,
 		"host" TEXT,
 		"proxy" TEXT,
-		"createTime" integer
+		"createTime" integer,
+		PRIMARY KEY ("id")
 	);
 	CREATE TABLE IF NOT EXISTS "dns_request" (
-		"id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"id" text NOT NULL,
 		"answer" TEXT,
 		"dnsType" TEXT,
 		"duration" integer,
 		"name" TEXT,
 		"qType" TEXT,
-		"createTime" integer
+		"createTime" integer,
+		PRIMARY KEY ("id")
 	);
 	CREATE TABLE IF NOT EXISTS "rule_match" (
-		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"id" text NOT NULL,
 		"duration" integer,
 		"rule" TEXT,
 		"payload" TEXT,
@@ -65,7 +67,8 @@ func InitDBTables(db *sql.DB) {
 		"m_host" TEXT,
 		"m_dnsMode" TEXT,
 		"m_processPath" TEXT,
-		"createTime" integer
+		"createTime" integer,
+		PRIMARY KEY ("id")
 	);
 	`
 	_, err := db.Exec(sql)
@@ -327,7 +330,7 @@ func QueryProxyDialRequests(db *sql.DB) tracingstruct.ApiProxyDialRequest {
 	}
 
 	// 查询域名被访问次数和时间
-	rows, _ = db.Query(`SELECT address, AVG(duration) as duration, COUNT(1) as count FROM proxy_dial GROUP BY address ORDER BY count DESC`)
+	rows, _ = db.Query(`SELECT host, AVG(duration) as duration, COUNT(1) as count FROM proxy_dial GROUP BY host ORDER BY count DESC`)
 	defer rows.Close()
 
 	for rows.Next() {
@@ -396,12 +399,40 @@ func QueryProcessDetail(db *sql.DB, path string, page int, pageSize int) tracing
 	return res
 }
 
+func QueryDomainDetail(db *sql.DB, host string, page int, pageSize int) tracingstruct.PageType[[]tracingstruct.ApiDomainDetail] {
+	mutex.Lock()
+
+	res := tracingstruct.PageType[[]tracingstruct.ApiDomainDetail]{
+		Total:    0,
+		Page:     page,
+		PageSize: pageSize,
+		Data:     []tracingstruct.ApiDomainDetail{},
+	}
+
+	// 根据host查询请求
+	rows, _ := db.Query(`SELECT p.duration as proxy_dial_duration, p.host, p.proxy, p.createTime , r.duration as rule_match_duration, r.rule, r.payload, r.m_network,r.m_type,r.m_sourceIP,r.m_destinationIP,r.m_destinationPort,r.m_sourcePort,r.m_dnsMode,r.m_processPath FROM proxy_dial p JOIN rule_match r ON p.id = r.id WHERE p.host = ? LIMIT ?,?`, host, (page-1)*pageSize, pageSize)
+	defer rows.Close()
+
+	for rows.Next() {
+		r := tracingstruct.ApiDomainDetail{}
+		rows.Scan(&r.ProxyDialDuration, &r.Host, &r.Proxy, &r.CreateTime, &r.RuleMatchDuration, &r.Rule, &r.Payload, &r.Network, &r.Type, &r.SourceIP, &r.DestinationIP, &r.DestinationPort, &r.SourcePort, &r.DNSMode, &r.ProcessPath)
+		res.Data = append(res.Data, r)
+	}
+
+	// 查总数
+	db.QueryRow(`SELECT COUNT(1) FROM proxy_dial p JOIN rule_match r ON p.id = r.id WHERE p.host = ?`, host).Scan(&res.Total)
+
+	mutex.Unlock()
+
+	return res
+}
+
 func syncDNSRequest(db *sql.DB) {
-	logMsg, query := "DNSRequest", "INSERT INTO dns_request(answer,dnsType,duration,name,qType, createTime) values(?,?,?,?,?,?)"
+	logMsg, query := "DNSRequest", "INSERT INTO dns_request(id,answer,dnsType,duration,name,qType, createTime) values(?,?,?,?,?,?,?)"
 	fmt.Printf("[%s]\t Writing %d records to the database...\n", logMsg, len(dnsRequestBuffer))
 	startInsert(db, logMsg, query, func(stmt *sql.Stmt, tx *sql.Tx) {
 		for _, record := range dnsRequestBuffer {
-			_, err := stmt.Exec(strings.Join(record.Answer, ","), record.DNSType, record.Duration, record.Name, record.QType, record.CreateTime)
+			_, err := stmt.Exec(record.ID, strings.Join(record.Answer, ","), record.DNSType, record.Duration, record.Name, record.QType, record.CreateTime)
 			if err != nil {
 				log.Printf("[%s]\t Failed to insert record:%v\n", logMsg, err)
 				tx.Rollback()
@@ -413,11 +444,11 @@ func syncDNSRequest(db *sql.DB) {
 }
 
 func syncRuleMatch(db *sql.DB) {
-	logMsg, query := "RuleMatch", "INSERT INTO rule_match(duration,rule,payload,proxy,m_network,m_type,m_sourceIP,m_destinationIP,m_sourcePort,m_destinationPort,m_host,m_dnsMode,m_processPath,createTime) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+	logMsg, query := "RuleMatch", "INSERT INTO rule_match(id,duration,rule,payload,proxy,m_network,m_type,m_sourceIP,m_destinationIP,m_sourcePort,m_destinationPort,m_host,m_dnsMode,m_processPath,createTime) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	fmt.Printf("[%s]\t Writing %d records to the database...\n", logMsg, len(ruleMatchBuffer))
 	startInsert(db, logMsg, query, func(stmt *sql.Stmt, tx *sql.Tx) {
 		for _, record := range ruleMatchBuffer {
-			_, err := stmt.Exec(record.Duration, record.Rule, record.Payload, record.Proxy, record.Metadata.Network, record.Metadata.Type, record.Metadata.SourceIP, record.Metadata.DestinationIP, record.Metadata.SourcePort, record.Metadata.DestinationPort, record.Metadata.Host, record.Metadata.DNSMode, record.Metadata.ProcessPath, record.CreateTime)
+			_, err := stmt.Exec(record.ID, record.Duration, record.Rule, record.Payload, record.Proxy, record.Metadata.Network, record.Metadata.Type, record.Metadata.SourceIP, record.Metadata.DestinationIP, record.Metadata.SourcePort, record.Metadata.DestinationPort, record.Metadata.Host, record.Metadata.DNSMode, record.Metadata.ProcessPath, record.CreateTime)
 			if err != nil {
 				log.Printf("[%s]\t Failed to insert record:%v\n", logMsg, err)
 				tx.Rollback()
@@ -429,11 +460,11 @@ func syncRuleMatch(db *sql.DB) {
 }
 
 func syncProxyDial(db *sql.DB) {
-	logMsg, query := "ProxyDial", "INSERT INTO proxy_dial(address,duration,host,proxy,createTime) values(?,?,?,?,?)"
+	logMsg, query := "ProxyDial", "INSERT INTO proxy_dial(id,address,duration,host,proxy,createTime) values(?,?,?,?,?,?)"
 	fmt.Printf("[%s]\t Writing %d records to the database...\n", logMsg, len(proxyDialBuffer))
 	startInsert(db, logMsg, query, func(stmt *sql.Stmt, tx *sql.Tx) {
 		for _, record := range proxyDialBuffer {
-			_, err := stmt.Exec(record.Address, record.Duration, record.Host, record.Proxy, record.CreateTime)
+			_, err := stmt.Exec(record.ID, record.Address, record.Duration, record.Host, record.Proxy, record.CreateTime)
 			if err != nil {
 				log.Printf("[%s]\t Failed to insert record:%v\n", logMsg, err)
 				tx.Rollback()

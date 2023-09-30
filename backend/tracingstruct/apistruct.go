@@ -92,6 +92,24 @@ type ApiProcessDetail struct {
 	CreateTime      int    `json:"createTime"`
 }
 
+type ApiDomainDetail struct {
+	ProxyDialDuration int    `json:"proxy_dial_duration"`
+	Host              string `json:"host"`
+	Proxy             string `json:"proxy"`
+	RuleMatchDuration int    `json:"rule_match_duration"`
+	Rule              string `json:"rule"`
+	Payload           string `json:"payload"`
+	Network           string `json:"network"`
+	Type              string `json:"type"`
+	SourceIP          string `json:"sourceIP"`
+	SourcePort        int    `json:"sourcePort"`
+	DestinationIP     string `json:"destinationIP"`
+	DestinationPort   int    `json:"destinationPort"`
+	DNSMode           string `json:"dnsMode"`
+	ProcessPath       string `json:"processPath"`
+	CreateTime        int    `json:"createTime"`
+}
+
 type PageType[T any] struct {
 	Total    int `json:"total"`
 	Page     int `json:"page"`
